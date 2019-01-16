@@ -5,20 +5,27 @@ import ajax from '@fdaciuk/ajax'
 import AppContent from './components/app-content'
 class App extends Component {
 
-  constructor() {
+  constructor () {
     super()
     this.state = {
       userinfo: null,
       repos: [],
-      starred: [],
+      starred: []
     }
   }
+
+  getGitHubApiUrl (username, type) {
+    const internalUser = username ? `/${username}` : ''
+    const internalType = type ? `/${type}` : ''
+    return `https://api.github.com/users${internalUser}${internalType}`
+  }
+
   handleSearch (e) {
-    const value = e.target.value;
+    const value = e.target.value
     const keyCode = e.which || e.keyCode
-    const ENTER = 13;
+    const ENTER = 13
     if (keyCode === ENTER) {
-      ajax().get(`https://api.github.com/users/${value}`)
+      ajax().get(this.getGitHubApiUrl(value))
         .then((result) => {
           this.setState({
             userinfo: {
@@ -28,7 +35,9 @@ class App extends Component {
               repos: result.public_repos,
               followers: result.followers,
               following: result.following
-            }
+            },
+            repos: [],
+            starred: []
           })
         })
     }
@@ -36,7 +45,9 @@ class App extends Component {
 
   getRepos (type) {
     return (e) => {
-      ajax().get(`https://api.github.com/users/${this.state.userinfo.login}/${type}`)
+      const username = this.state.userinfo.login
+
+      ajax().get(this.getGitHubApiUrl(username, type))
         .then((result) => {
           this.setState({
             [type]: result.map(({ id, name, html_url }) => ({ id, name, link: html_url }))
@@ -54,7 +65,6 @@ class App extends Component {
       getRepos={this.getRepos('repos')}
       getStarred={this.getRepos('starred')}
     />
-
   }
 }
 export default App
