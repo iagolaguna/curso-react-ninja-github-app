@@ -34,26 +34,25 @@ class App extends Component {
     }
   }
 
-  handleRepos () {
-    ajax().get(`https://api.github.com/users/${this.state.userinfo.login}/repos`)
-      .then((result) => {
-        this.setState({ repos: result })
-      })
+  getRepos (type) {
+    return (e) => {
+      ajax().get(`https://api.github.com/users/${this.state.userinfo.login}/${type}`)
+        .then((result) => {
+          this.setState({
+            [type]: result.map(({ id, name, html_url }) => ({ id, name, link: html_url }))
+          })
+        })
+    }
   }
-  handleStarred () {
-    ajax().get(`https://api.github.com/users/${this.state.userinfo.login}/starred`)
-      .then((result) => {
-        this.setState({ starred: result })
-      })
-  }
+
   render () {
     return <AppContent
       userinfo={this.state.userinfo}
       repos={this.state.repos}
       starred={this.state.starred}
       handleSearch={(e) => this.handleSearch(e)}
-      handleRepos={() => this.handleRepos()}
-      handleStarred={() => this.handleStarred()}
+      getRepos={this.getRepos('repos')}
+      getStarred={this.getRepos('starred')}
     />
 
   }
