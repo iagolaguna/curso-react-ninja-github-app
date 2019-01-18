@@ -5,12 +5,13 @@ import ajax from '@fdaciuk/ajax'
 import AppContent from './components/app-content'
 class App extends Component {
 
-  constructor () {
+  constructor() {
     super()
     this.state = {
       userinfo: null,
       repos: [],
-      starred: []
+      starred: [],
+      isFetching: false
     }
   }
 
@@ -21,10 +22,13 @@ class App extends Component {
   }
 
   handleSearch (e) {
-    const value = e.target.value
+    const target = e.target
+    const value = target.value
     const keyCode = e.which || e.keyCode
     const ENTER = 13
+
     if (keyCode === ENTER) {
+      this.setState({ isFetching: true })
       ajax().get(this.getGitHubApiUrl(value))
         .then((result) => {
           this.setState({
@@ -40,6 +44,7 @@ class App extends Component {
             starred: []
           })
         })
+        .always(() => this.setState({ isFetching: false }))
     }
   }
 
@@ -61,6 +66,7 @@ class App extends Component {
       userinfo={this.state.userinfo}
       repos={this.state.repos}
       starred={this.state.starred}
+      isFetching={this.state.isFetching}
       handleSearch={(e) => this.handleSearch(e)}
       getRepos={this.getRepos('repos')}
       getStarred={this.getRepos('starred')}
